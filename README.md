@@ -1,7 +1,4 @@
-# PySpark ETL Pipeline for E-Commerce Orders Analysis
-
-## Project Overview
-
+# PySpark ETL Pipeline 
 This project demonstrates the implementation of a complete **ETL (Extract, Transform, Load) pipeline** using **Apache Spark (PySpark)**. The objective is to understand Spark's distributed data processing capabilities while building an end-to-end data processing workflow for an e-commerce orders dataset.
 
 The project begins by generating a realistic dataset containing customer orders with intentionally introduced duplicate records and missing values. The dataset is then processed through multiple transformation stages, including data cleaning, schema handling, filtering, aggregation, and optimized storage. Finally, the processed data is stored in both **CSV** and **Parquet** formats to compare storage and performance characteristics.
@@ -491,6 +488,20 @@ Possible improvements include:
 - Cloud Storage Integration (AWS S3, Azure Blob Storage, Google Cloud Storage)
 
 ---
+Performance and Architecture Insights
+Spark Architecture
+Apache Spark follows a Driver–Executor architecture, where the Driver creates the execution plan (DAG), coordinates tasks, and collects results, while Executors perform parallel data processing.
+In this project, Spark was executed in local[*] mode, utilizing all available CPU cores to simulate distributed processing on a single machine.
+The Cluster Manager (used in cluster deployments) allocates resources and manages executors, enabling Spark applications to scale across multiple nodes.
+Performance Insights
+Lazy Evaluation improved performance by delaying execution until an action (show(), count(), etc.) was triggered, allowing Spark to optimize the execution plan.
+Narrow Transformations such as select(), filter(), and withColumn() were efficient because they processed data within the same partition without requiring data movement.
+Wide Transformations like groupBy() triggered a Shuffle, where data was redistributed across partitions. Although necessary for aggregation, shuffle increases execution time due to disk and network I/O.
+The cleaned dataset was saved in both CSV and Parquet formats. Compared to CSV, Parquet provided better compression, faster reads, and lower storage requirements because of its columnar storage format.
+Predicate Pushdown reduced disk I/O by filtering records at the storage layer before loading them into Spark.
+Column Pruning improved efficiency by reading only the required columns from the Parquet file instead of scanning the entire dataset.
+The Catalyst Optimizer automatically optimized the query execution plan by combining transformations, applying predicate pushdown, and eliminating unnecessary operations, resulting in better overall performance.
+Following Spark best practices, show() was used instead of collect() to avoid loading the entire dataset into the Driver's memory, making the application more scalable for large datasets.
 
 # Conclusion
 
