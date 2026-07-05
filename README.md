@@ -488,21 +488,26 @@ Possible improvements include:
 - Cloud Storage Integration (AWS S3, Azure Blob Storage, Google Cloud Storage)
 
 ---
-Performance and Architecture Insights
-Spark Architecture
-Apache Spark follows a Driver–Executor architecture, where the Driver creates the execution plan (DAG), coordinates tasks, and collects results, while Executors perform parallel data processing.
-In this project, Spark was executed in local[*] mode, utilizing all available CPU cores to simulate distributed processing on a single machine.
-The Cluster Manager (used in cluster deployments) allocates resources and manages executors, enabling Spark applications to scale across multiple nodes.
-Performance Insights
-Lazy Evaluation improved performance by delaying execution until an action (show(), count(), etc.) was triggered, allowing Spark to optimize the execution plan.
-Narrow Transformations such as select(), filter(), and withColumn() were efficient because they processed data within the same partition without requiring data movement.
-Wide Transformations like groupBy() triggered a Shuffle, where data was redistributed across partitions. Although necessary for aggregation, shuffle increases execution time due to disk and network I/O.
-The cleaned dataset was saved in both CSV and Parquet formats. Compared to CSV, Parquet provided better compression, faster reads, and lower storage requirements because of its columnar storage format.
-Predicate Pushdown reduced disk I/O by filtering records at the storage layer before loading them into Spark.
-Column Pruning improved efficiency by reading only the required columns from the Parquet file instead of scanning the entire dataset.
-The Catalyst Optimizer automatically optimized the query execution plan by combining transformations, applying predicate pushdown, and eliminating unnecessary operations, resulting in better overall performance.
-Following Spark best practices, show() was used instead of collect() to avoid loading the entire dataset into the Driver's memory, making the application more scalable for large datasets.
+## Performance and Architecture Insights
 
+### Spark Architecture
+
+Apache Spark follows a **Driver–Executor architecture** for distributed data processing. The **Driver** creates the execution plan (DAG), schedules tasks, and coordinates execution, while **Executors** process data in parallel across available resources. In this project, Spark was executed in **local[*] mode**, utilizing all available CPU cores on a single machine. In a production environment, a **Cluster Manager** (such as YARN, Kubernetes, or Spark Standalone) allocates resources and manages executors across multiple nodes, enabling scalable distributed processing.
+
+### Performance Insights
+
+- **Lazy Evaluation:** Spark delays execution until an action such as `show()` or `count()` is called, allowing it to optimize the execution plan.
+- **Narrow Transformations:** Operations like `select()`, `filter()`, and `withColumn()` process data within the same partition, avoiding data movement and improving performance.
+- **Wide Transformations:** Operations such as `groupBy()` require a **Shuffle**, redistributing data across partitions for aggregation. Although necessary, shuffle increases execution time due to network and disk I/O.
+- **CSV vs Parquet:** The processed dataset was saved in both CSV and Parquet formats. Parquet provided better compression, faster read performance, and lower storage usage because of its columnar storage format.
+- **Predicate Pushdown:** Filtering conditions were pushed to the Parquet storage layer, reducing unnecessary disk reads and improving query performance.
+- **Column Pruning:** Spark read only the required columns from the Parquet file, reducing disk I/O and memory consumption.
+- **Catalyst Optimizer:** Spark automatically optimized the query execution plan by applying techniques such as predicate pushdown, column pruning, and transformation optimization.
+- **Best Practices:** The project used `show()` instead of `collect()` to avoid loading the entire dataset into the Driver's memory, making the application more scalable and memory-efficient.
+
+### Overall Observation
+
+This project demonstrates how Apache Spark efficiently processes large datasets using distributed computing, lazy evaluation, optimized execution planning, and columnar storage formats. By leveraging Parquet, minimizing shuffle operations, and utilizing Spark's built-in optimizations, the ETL pipeline achieved improved performance, scalability, and resource utilization compared to traditional data processing approaches.
 # Conclusion
 
 This project demonstrates a complete ETL pipeline using Apache Spark and PySpark while providing practical exposure to core big data processing concepts. Beginning with raw data generation, the pipeline performs schema handling, data cleaning, transformation, filtering, aggregation, and optimized data storage. Throughout the implementation, important Spark concepts such as Lazy Evaluation, DAG execution, Shuffle operations, Catalyst Optimizer, Predicate Pushdown, and Column Pruning are explored in a practical context.
